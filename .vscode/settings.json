@@ -18,6 +18,9 @@
   "files.associations": {
     "*.inc": "c",
     "dht11.h": "c",
-    "esp_rom_gpio.h": "c"
+    "esp_rom_gpio.h": "c",
+    "esp32-dht11.h": "c",
+    "freertos.h": "c",
+    "task.h": "c"
   }
 }
