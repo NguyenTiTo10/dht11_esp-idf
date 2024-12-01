@@ -1,81 +1,140 @@
+/*
+ * MIT License
+ * 
+ * Copyright (c) 2018 Michele Biondi
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+*/
+
+#include "esp_timer.h"
 #include "driver/gpio.h"
+#include "rom/ets_sys.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_log.h"
 
-#define DHT11_PIN GPIO_NUM_4 // Replace with your GPIO pin
+#include <esp_event_loop.h>
+#include "esp_timer.h"
 
-// Timing definitions (in microseconds)
-#define DHT_START_SIGNAL_LOW_TIME 18000 // MCU start signal low duration
-#define DHT_START_SIGNAL_WAIT_TIME 20   // MCU wait time after pulling high
-#define DHT_RESPONSE_LOW_TIME 80        // DHT response low duration
-#define DHT_RESPONSE_HIGH_TIME 80       // DHT response high duration
-#define DHT_BIT_DURATION 50             // Each bit starts with 50µs low
+#include "include/dht11.h"
 
-static const char *TAG = "DHT11";
+static gpio_num_t dht_gpio;
+static int64_t last_read_time = -2000000;
+static struct dht11_reading last_read;
 
-static esp_err_t dht11_start_signal(void) {
-    gpio_set_direction(DHT11_PIN, GPIO_MODE_OUTPUT);
-    gpio_set_level(DHT11_PIN, 0);
-    ets_delay_us(DHT_START_SIGNAL_LOW_TIME); // Hold low for 18ms
-    gpio_set_level(DHT11_PIN, 1);
-    ets_delay_us(DHT_START_SIGNAL_WAIT_TIME); // Wait 20-40µs
-    gpio_set_direction(DHT11_PIN, GPIO_MODE_INPUT);
-    return ESP_OK;
+static int _waitOrTimeout(uint16_t microSeconds, int level) {
+    int micros_ticks = 0;
+    while(gpio_get_level(dht_gpio) == level) { 
+        if(micros_ticks++ > microSeconds) 
+            return DHT11_TIMEOUT_ERROR;
+        ets_delay_us(1);
+    }
+    return micros_ticks;
 }
 
-static esp_err_t dht11_read_data(uint8_t *data) {
-    uint32_t low_time, high_time;
-    for (int i = 0; i < 40; ++i) {
-        while (!gpio_get_level(DHT11_PIN)) {}; // Wait for low signal
-        low_time = esp_timer_get_time();
-        while (gpio_get_level(DHT11_PIN)) {}; // Wait for high signal
-        high_time = esp_timer_get_time() - low_time;
+static int _checkCRC(uint8_t data[]) {
+    if(data[4] == (data[0] + data[1] + data[2] + data[3]))
+        return DHT11_OK;
+    else
+        return DHT11_CRC_ERROR;
+}
 
-        data[i / 8] <<= 1; // Shift data
-        if (high_time > DHT_BIT_DURATION) {
-            data[i / 8] |= 1; // Set bit if high duration > 50µs
+static void _sendStartSignal() {
+    gpio_set_direction(dht_gpio, GPIO_MODE_OUTPUT);
+    gpio_set_level(dht_gpio, 0);
+    ets_delay_us(20 * 1000);
+    gpio_set_level(dht_gpio, 1);
+    ets_delay_us(40);
+    gpio_set_direction(dht_gpio, GPIO_MODE_INPUT);
+}
+
+static int _checkResponse() {
+    /* Wait for next step ~80us*/
+    if(_waitOrTimeout(80, 0) == DHT11_TIMEOUT_ERROR)
+        return DHT11_TIMEOUT_ERROR;
+
+    /* Wait for next step ~80us*/
+    if(_waitOrTimeout(80, 1) == DHT11_TIMEOUT_ERROR) 
+        return DHT11_TIMEOUT_ERROR;
+
+    return DHT11_OK;
+}
+
+static struct dht11_reading _timeoutError() {
+    struct dht11_reading timeoutError = {DHT11_TIMEOUT_ERROR, -1, -1};
+    return timeoutError;
+}
+
+static struct dht11_reading _crcError() {
+    struct dht11_reading crcError = {DHT11_CRC_ERROR, -1, -1};
+    return crcError;
+}
+
+void DHT11_init(gpio_num_t gpio_num) {
+    /* Wait 1 seconds to make the device pass its initial unstable status */
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    dht_gpio = gpio_num;
+}
+
+struct dht11_reading DHT11_read() {
+    /* Tried to sense too son since last read (dht11 needs ~2 seconds to make a new read) */
+    if(esp_timer_get_time() - 2000000 < last_read_time) {
+        return last_read;
+    }
+
+    last_read_time = esp_timer_get_time();
+
+    uint8_t data[5] = {0,0,0,0,0};
+
+    _sendStartSignal();
+
+    if(_checkResponse() == DHT11_TIMEOUT_ERROR)
+        return last_read = _timeoutError();
+    
+    /* Read response */
+    for(int i = 0; i < 40; i++) {
+        /* Initial data */
+        if(_waitOrTimeout(50, 0) == DHT11_TIMEOUT_ERROR)
+            return last_read = _timeoutError();
+                
+        if(_waitOrTimeout(70, 1) > 28) {
+            /* Bit received was a 1 */
+            data[i/8] |= (1 << (7-(i%8)));
         }
     }
-    return ESP_OK;
+
+    if(_checkCRC(data) != DHT11_CRC_ERROR) {
+        last_read.status = DHT11_OK;
+        last_read.temperature = data[2];
+        last_read.humidity = data[0];
+        return last_read;
+    } else {
+        return last_read = _crcError();
+    }
 }
 
-esp_err_t dht11_read(uint8_t *humidity, uint8_t *temperature) {
-    uint8_t data[5] = {0};
-    esp_err_t ret = dht11_start_signal();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Start signal failed");
-        return ret;
-    }
+void app_main()
+{
+    DHT11_init(GPIO_NUM_4);
 
-    // Read 40-bit data
-    ret = dht11_read_data(data);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to read data");
-        return ret;
-    }
-
-    // Verify checksum
-    uint8_t checksum = data[0] + data[1] + data[2] + data[3];
-    if (checksum != data[4]) {
-        ESP_LOGE(TAG, "Checksum error");
-        return ESP_ERR_INVALID_CRC;
-    }
-
-    *humidity = data[0];
-    *temperature = data[2];
-    return ESP_OK;
-}
-
-void app_main(void) {
-    uint8_t humidity = 0, temperature = 0;
-
-    while (1) {
-        if (dht11_read(&humidity, &temperature) == ESP_OK) {
-            ESP_LOGI(TAG, "Humidity: %d%%, Temperature: %d°C", humidity, temperature);
-        } else {
-            ESP_LOGE(TAG, "Failed to read DHT11");
-        }
-        vTaskDelay(pdMS_TO_TICKS(2000)); // Delay 2 seconds
+    while(1) {
+        printf("Temperature:%d*C ", DHT11_read().temperature);
+        printf("Humidity:%d%%\n", DHT11_read().humidity);
+        sleep(10);
     }
 }
