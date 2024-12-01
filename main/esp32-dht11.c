@@ -2,18 +2,20 @@
 
 int wait_for_state(dht11_t dht11,int state,int timeout)
 {
-    gpio_set_direction(dht11.dht11_pin, GPIO_MODE_INPUT);
-    int count = 0;
+    gpio_set_direction(dht11.dht11_pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
+                                                                        // Let the DHT11 sends data
+
+    int count = 0;                                                      // Track elapsed time spent waiting for the pin state
     
-    while(gpio_get_level(dht11.dht11_pin) != state)
+    while(gpio_get_level(dht11.dht11_pin) != state)                    
     {
-        if(count == timeout) return -1;
+        if(count == timeout)                                            // If reached the timeout, return -1 (fail).
+            return -1;                                  
         count += 2;
-        ets_delay_us(2);
-        
+        ets_delay_us(2);                                                // A short delay of 2 microseconds
     }
 
-    return  count;
+    return  count;                                                      // Return the Elapsed Time
 }
 
 void hold_low(dht11_t dht11,int hold_time_us)
