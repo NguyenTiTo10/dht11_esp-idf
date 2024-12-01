@@ -35,13 +35,14 @@ int wait_for_state(dht11_t dht11,int state,int timeout)
         
     Make a initialization sequence for communication with the DHT11 sensor.
 */
-
 void hold_low(dht11_t dht11, int hold_time_us)
 {
-    gpio_set_direction(dht11.dht11_pin,GPIO_MODE_OUTPUT);
-    gpio_set_level(dht11.dht11_pin,0);
-    ets_delay_us(hold_time_us);
-    gpio_set_level(dht11.dht11_pin,1);
+    gpio_set_direction(dht11.dht11_pin,GPIO_MODE_OUTPUT);               // Configure GPIO: Output
+    gpio_set_level(dht11.dht11_pin,0);                                  // Drives the GPIO pin to a low logic level (0) 
+                                                                            // To send a "start signal" to the DHT11 sensor.
+    ets_delay_us(hold_time_us);                                         // Delay "hold_time_us"
+    gpio_set_level(dht11.dht11_pin,1);                                  // Drives the GPIO pin back to a high logic level (1)
+                                                                        // After this step, the DHT11 will begin its response.
 }
 
 int dht11_read(dht11_t *dht11,int connection_timeout)

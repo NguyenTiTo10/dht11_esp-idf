@@ -25,7 +25,7 @@ typedef struct
 */
 int wait_for_state(dht11_t dht11,int state,int timeout);
 /**
- * @brief Holds the pin low fo the specified duration
+ * @brief Holds the pin low to the specified duration
  * @param hold_time_us time to hold the pin low for in microseconds
 */
 void hold_low(dht11_t dht11,int hold_time_us);
