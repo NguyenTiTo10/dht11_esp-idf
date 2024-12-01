@@ -18,19 +18,7 @@ void bsp_gpio_toggle_pin  (gpio_num_t gpio_num)
   gpio_set_level(gpio_num, state);
 }
 
-// ISR handler for button interrupt
-void  bsp_gpio_isr_handler(void *arg)
+void bsp_gpio_set_direction (gpio_num_t gpio_num, gpio_mode_t mode)
 {
-  isr_flag = true;
-}
-
-bool bsp_get_isr_flag (void)
-{
-  return isr_flag;
-}
-
-bool bsp_set_isr_flag (bool state)
-{
-  isr_flag = state;
-  return (isr_flag == state) ? true : false;
+  gpio_set_direction(gpio_num, mode);
 }
