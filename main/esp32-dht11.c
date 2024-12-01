@@ -45,6 +45,26 @@ void hold_low(dht11_t dht11, int hold_time_us)
                                                                         // After this step, the DHT11 will begin its response.
 }
 
+/**
+ * @brief Validate the checksum of the received DHT11 data.
+ * 
+ * @param data Pointer to the array containing the received data (5 bytes).
+ *             data[0] = Humidity integer part
+ *             data[1] = Humidity decimal part
+ *             data[2] = Temperature integer part
+ *             data[3] = Temperature decimal part
+ *             data[4] = Checksum
+ * @return true if checksum is valid, false otherwise.
+ */
+bool validate_checksum(const uint8_t *data) {
+    if (data == NULL) {
+        return false; // Handle null pointer
+    }
+
+    uint8_t calculated_checksum = data[0] + data[1] + data[2] + data[3];
+    return (calculated_checksum == data[4]);
+}
+
 int dht11_read(dht11_t *dht11,int connection_timeout)
 {
     int waited = 0;                                                     // Tracks the duration for state changes.
@@ -115,6 +135,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
     }
     dht11->humidity = recieved_data[0] + recieved_data[1] /10.0 ;               // recieved_data[0]: Phần đơn vị
                                                                                 // recieved_data[1] /10.0: Phần hàng chục
-    dht11->temperature = recieved_data[2] + recieved_data[3] /10.0 ;
+
+    dht11->temperature = recieved_data[2] + recieved_data[3] /10.0 ;            // Tương tự với nhiệt độ
     return 0;                                                                   
 }
