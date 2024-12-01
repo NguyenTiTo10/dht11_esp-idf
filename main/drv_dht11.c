@@ -1,4 +1,4 @@
-#include "esp32-dht11.h"
+#include "drv_dht11.h"
 
 
 /*
@@ -6,8 +6,14 @@
     For example:
         A short high pulse (26–28 µs) represents a 0.
         A long high pulse (70 µs) represents a 1.
-
-    By measuring how long it takes for the pin to reach a state, this function enables the driver to decode the transmitted bits.
+    By measuring how long it takes for the pin to reach a state, 
+    This function enables the driver to decode the transmitted bits.
+*/
+/**
+ * @brief Wait on pin until it reaches the specified state
+ * @return returns either the time waited or -1 in the case of a timeout
+ * @param state state to wait for
+ * @param timeout if counter reaches timeout the function returns -1
 */
 int wait_for_state(dht11_t dht11,int state,int timeout)
 {
@@ -26,6 +32,7 @@ int wait_for_state(dht11_t dht11,int state,int timeout)
 
     return  count;                                                      // Return the Elapsed Time
 }
+
 
 
 /*

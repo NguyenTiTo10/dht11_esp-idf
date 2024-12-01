@@ -21,13 +21,7 @@ typedef struct
     float temperature;
     float humidity;
 } dht11_t;
-/**
- * @brief Wait on pin until it reaches the specified state
- * @return returns either the time waited or -1 in the case of a timeout
- * @param state state to wait for
- * @param timeout if counter reaches timeout the function returns -1
-*/
-int wait_for_state(dht11_t dht11,int state,int timeout);
+
 /**
  * @brief Holds the pin low to the specified duration
  * @param hold_time_us time to hold the pin low for in microseconds
