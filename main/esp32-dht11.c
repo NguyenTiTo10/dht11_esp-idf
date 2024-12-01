@@ -1,5 +1,14 @@
 #include "esp32-dht11.h"
 
+
+/*
+    Relies on precise timing to distinguish between 0 and 1 bits in the data stream.
+    For example:
+        A short high pulse (26–28 µs) represents a 0.
+        A long high pulse (70 µs) represents a 1.
+
+    By measuring how long it takes for the pin to reach a state, this function enables the driver to decode the transmitted bits.
+*/
 int wait_for_state(dht11_t dht11,int state,int timeout)
 {
     gpio_set_direction(dht11.dht11_pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
@@ -18,7 +27,16 @@ int wait_for_state(dht11_t dht11,int state,int timeout)
     return  count;                                                      // Return the Elapsed Time
 }
 
-void hold_low(dht11_t dht11,int hold_time_us)
+
+/*
+    Send a signal from the ESP32 to the DHT11 sensor:
+        - By pulling a GPIO pin low (logic level 0) for a specified amount of time.
+        - Then returning the pin to high (logic level 1). 
+        
+    Make a initialization sequence for communication with the DHT11 sensor.
+*/
+
+void hold_low(dht11_t dht11, int hold_time_us)
 {
     gpio_set_direction(dht11.dht11_pin,GPIO_MODE_OUTPUT);
     gpio_set_level(dht11.dht11_pin,0);
