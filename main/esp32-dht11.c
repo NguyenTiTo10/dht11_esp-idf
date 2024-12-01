@@ -133,6 +133,13 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
                                                                                     // otherwise, it’s 0
         }
     }
+
+    // Validate checksum
+    if (!validate_checksum(recieved_data)) {
+        ESP_LOGE("DHT11:", "Checksum validation failed");
+        return -2;
+    }
+
     dht11->humidity = recieved_data[0] + recieved_data[1] /10.0 ;               // recieved_data[0]: Phần đơn vị
                                                                                 // recieved_data[1] /10.0: Phần hàng chục
 

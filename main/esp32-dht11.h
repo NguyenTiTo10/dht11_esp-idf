@@ -5,6 +5,10 @@
 #include <string.h>
 #include <rom/ets_sys.h>
 #include "esp_log.h"
+
+#include <stdint.h>
+#include <stdbool.h>
+
 /**
  * Structure containing readings and info about the dht11
  * @var dht11_pin the pin associated with the dht11
