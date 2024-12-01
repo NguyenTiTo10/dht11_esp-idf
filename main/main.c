@@ -3,6 +3,9 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_system.h" // For ets_delay_us
+#include "esp_rom_gpio.h" // For esp_rom_gpio_pad_select_gpio
+#include "rom/ets_sys.h"
 
 #define DHT11_PIN GPIO_NUM_4  // Change this to the GPIO pin you are using
 
@@ -14,11 +17,13 @@ typedef struct {
 static const char *TAG = "DHT11";
 
 static void dht11_delay_us(uint32_t us) {
+    // Use the ESP-IDF function for microsecond delay
     ets_delay_us(us);
 }
 
 static void dht11_gpio_init() {
-    gpio_pad_select_gpio(DHT11_PIN);
+    // Use esp_rom_gpio_pad_select_gpio instead of gpio_pad_select_gpio
+    esp_rom_gpio_pad_select_gpio(DHT11_PIN);
     gpio_set_direction(DHT11_PIN, GPIO_MODE_OUTPUT);
     gpio_set_level(DHT11_PIN, 1);
 }
@@ -74,13 +79,29 @@ bool dht11_read(dht11_data_t *data) {
 
 void app_main(void) {
     dht11_data_t data;
+    const int max_retries = 5; // Maximum number of retries
+    const int retry_delay = 500; // Delay between retries in milliseconds
+
+    // Initial delay before the first read
+    vTaskDelay(pdMS_TO_TICKS(2000));
 
     while (1) {
-        if (dht11_read(&data)) {
-            printf("Temperature: %.1f °C, Humidity: %.1f %%\n", data.temperature, data.humidity);
-        } else {
-            printf("Failed to read from DHT11 sensor\n");
+        bool success = false;
+        for (int i = 0; i < max_retries; i++) {
+            if (dht11_read(&data)) {
+                printf("Temperature: %.1f °C, Humidity: %.1f %%\n", data.temperature, data.humidity);
+                success = true;
+                break; // Exit the retry loop on success
+            } else {
+                printf("Failed to read from DHT11 sensor, attempt %d\n", i + 1);
+                vTaskDelay(pdMS_TO_TICKS(retry_delay)); // Wait before retrying
+            }
         }
-        vTaskDelay(pdMS_TO_TICKS(2000)); // Read every 2 seconds
+
+        if (!success) {
+            printf("Failed to read from DHT11 sensor after %d attempts\n", max_retries);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(3000)); // Read every 3 seconds
     }
 }
