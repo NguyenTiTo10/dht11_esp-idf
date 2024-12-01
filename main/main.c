@@ -1,4 +1,4 @@
-#include "esp32-dht11.h"
+#include "drv_dht11.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
