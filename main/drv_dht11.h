@@ -7,6 +7,7 @@
 #include "esp_log.h"
 
 #include "bsp_timer.h"
+#include "bsp_gpio.h"
 
 #include <stdint.h>
 #include <stdbool.h>
