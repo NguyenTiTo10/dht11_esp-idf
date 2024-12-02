@@ -27,11 +27,6 @@ typedef struct
 } dht11_t;
 
 
-/**
- * @brief The function for reading temperature and humidity values from the dht11
- * @note  This function is blocking, ie: it forces the cpu to busy wait for the duration necessary to finish comms with the sensor.
- * @note  Wait for atleast 2 seconds between reads 
- * @param connection_timeout the number of connection attempts before declaring a timeout
-*/
+
 int drv_dht11_start_read(dht11_t *dht11,int connection_timeout);
 #endif

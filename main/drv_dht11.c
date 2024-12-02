@@ -3,9 +3,7 @@
 
 static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout);
 static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us);
-static  drv_dht11_checksum_valid(const uint8_t *data);
 
-static uint8_t drv_dht11_recieved_data[5] =  {0};                                        // Stores the raw data received from the sensor
 
 /**
  * @brief Wait on pin until it reaches the specified state
@@ -58,10 +56,8 @@ static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us)
  *             data[4] = Checksum
  * @return true if checksum is valid, false otherwise.
  */
-static  drv_dht11_checksum_valid(const uint8_t *data) 
-{
-    if (data == NULL) 
-    {
+bool drv_dht11_checksum_valid(const uint8_t *data) {
+    if (data == NULL) {
         return false; // Handle null pointer
     }
 
@@ -70,12 +66,21 @@ static  drv_dht11_checksum_valid(const uint8_t *data)
 }
 
 
-int drv_dht11_start_read(dht11_t *dht11, int connection_timeout)
+int drv_dht11_start_read(dht11_t *dht11,int connection_timeout)
 {
     int waited = 0;                                                     // Tracks the duration for state changes.
     int one_duration = 0;                                               // Measure the high pulse durations for decoding bits.
     int zero_duration = 0;                                              // Measure the low pulse durations for decoding bits.
     int timeout_counter = 0;                                            // Counts the number of retries.
+
+    uint8_t recieved_data[5] =                                          // Stores the raw data received from the sensor
+    {
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00
+    };
 
     while(timeout_counter < connection_timeout)                         
     {
@@ -122,21 +127,21 @@ int drv_dht11_start_read(dht11_t *dht11, int connection_timeout)
         {
             zero_duration = drv_dht11_check_state_time(*dht11,1,60);                        // Time spent at logic level 1
             one_duration = drv_dht11_check_state_time(*dht11,0,80);                         // Time spent at logic level 0
-            drv_dht11_recieved_data[i] |= (one_duration > zero_duration) << (7 - j);      // If one_duration > zero_duration, 
+            recieved_data[i] |= (one_duration > zero_duration) << (7 - j);      // If one_duration > zero_duration, 
                                                                                     // the bit is 1; 
                                                                                     // otherwise, it’s 0
         }
     }
 
     // Validate checksum
-    if (!drv_dht11_checksum_valid(drv_dht11_recieved_data)) {
+    if (!drv_dht11_checksum_valid(recieved_data)) {
         ESP_LOGE("DHT11:", "Checksum validation failed");
         return -2;
     }
 
-    dht11->humidity = drv_dht11_recieved_data[0] + drv_dht11_recieved_data[1] /10.0 ;               // drv_dht11_recieved_data[0]: Phần đơn vị
-                                                                                // drv_dht11_recieved_data[1] /10.0: Phần hàng chục
+    dht11->humidity = recieved_data[0] + recieved_data[1] /10.0 ;               // recieved_data[0]: Phần đơn vị
+                                                                                // recieved_data[1] /10.0: Phần hàng chục
 
-    dht11->temperature = drv_dht11_recieved_data[2] + drv_dht11_recieved_data[3] /10.0 ;            // Tương tự với nhiệt độ
+    dht11->temperature = recieved_data[2] + recieved_data[3] /10.0 ;            // Tương tự với nhiệt độ
     return 0;                                                                   
 }
