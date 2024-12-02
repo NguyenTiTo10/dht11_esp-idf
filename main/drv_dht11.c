@@ -1,17 +1,13 @@
 #include "drv_dht11.h"
 
 
+static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout);
+
 /**
  * @brief Wait on pin until it reaches the specified state
  * @return returns either the time waited or -1 in the case of a timeout
  * @param state state to wait for
  * @param timeout if counter reaches timeout the function returns -1
- * Relies on precise timing to distinguish between 0 and 1 bits in the data stream.
-    For example:
-        A short high pulse (26–28 µs) represents a 0.
-        A long high pulse (70 µs) represents a 1.
-    By measuring how long it takes for the pin to reach a state, 
-    This function enables the driver to decode the transmitted bits.
 */
 static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout)
 {
@@ -25,7 +21,7 @@ static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout)
         if(wait_time == timeout)                                            // If reached the timeout, return -1.
             return -1;                                  
         wait_time += 2;
-        ets_delay_us(2);                                                // A short delay of 2 microseconds
+        bsp_timer_ets_delay_us(2);                                                // A short delay of 2 microseconds
     }
 
     return  wait_time;                                                      // Return the Elapsed Time
@@ -36,19 +32,14 @@ static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout)
 /**
  * @brief Holds the pin low to the specified duration
  * @param hold_time_us time to hold the pin low for in microseconds
-    Send a signal from the ESP32 to the DHT11 sensor:
-        - By pulling a GPIO pin low (logic level 0) for a specified amount of time.
-        - Then returning the pin to high (logic level 1). 
-        
-    Make a initialization sequence for communication with the DHT11 sensor.
 */
 void hold_low(dht11_t dht11, int hold_time_us)
 {
     gpio_set_direction(dht11.dht11_pin,GPIO_MODE_OUTPUT);               // Configure GPIO: Output
-    gpio_set_level(dht11.dht11_pin,0);                                  // Drives the GPIO pin to a low logic level (0) 
+    bsp_gpio_write_pin(dht11.dht11_pin,0);                                  // Drives the GPIO pin to a low logic level (0) 
                                                                             // To send a "start signal" to the DHT11 sensor.
-    ets_delay_us(hold_time_us);                                         // Delay "hold_time_us"
-    gpio_set_level(dht11.dht11_pin,1);                                  // Drives the GPIO pin back to a high logic level (1)
+    bsp_timer_ets_delay_us(hold_time_us);                                         // Delay "hold_time_us"
+    bsp_gpio_write_pin(dht11.dht11_pin,1);                                  // Drives the GPIO pin back to a high logic level (1)
                                                                         // After this step, the DHT11 will begin its response.
 }
 
@@ -102,7 +93,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
         if(waited == -1)    
         {
             ESP_LOGE("DHT11:","Failed at phase 1");     
-            ets_delay_us(20000);
+            bsp_timer_ets_delay_us(20000);
             continue;
         } 
 
@@ -111,7 +102,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
         if(waited == -1) 
         {
             ESP_LOGE("DHT11:","Failed at phase 2");
-            ets_delay_us(20000);
+            bsp_timer_ets_delay_us(20000);
             continue;
         } 
         
@@ -119,7 +110,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
         if(waited == -1) 
         {
             ESP_LOGE("DHT11:","Failed at phase 3");
-            ets_delay_us(20000);
+            bsp_timer_ets_delay_us(20000);
             continue;
         } 
         break;     
