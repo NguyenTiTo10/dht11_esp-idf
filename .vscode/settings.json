@@ -24,6 +24,7 @@
     "task.h": "c",
     "bitset": "c",
     "algorithm": "c",
-    "format": "c"
+    "format": "c",
+    "drv_dht11.h": "c"
   }
 }

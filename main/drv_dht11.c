@@ -171,7 +171,8 @@ int drv_dht11_start_read(void)
                                                                                 // recieved_data[1] /10.0: Phần hàng chục
 
     dht11_sensor.temperature = recieved_data[2] + recieved_data[3] /10.0 ;            // Tương tự với nhiệt độ
-    return 0;                                                                   
+
+    return 1;                                                                   
 }
 
 
