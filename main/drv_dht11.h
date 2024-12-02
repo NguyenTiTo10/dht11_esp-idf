@@ -19,6 +19,11 @@
  * @var temperature last temperature reading
  * @var humidity last humidity reading 
 */
+
+
+#define CONFIG_DHT11_PIN GPIO_NUM_4
+#define CONFIG_CONNECTION_TIMEOUT 5
+
 typedef struct
 {
     int dht11_pin;

@@ -2,12 +2,10 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#define CONFIG_DHT11_PIN GPIO_NUM_4
-#define CONFIG_CONNECTION_TIMEOUT 5
+
 
 void app_main() {
-    dht11_t dht11_sensor;
-    dht11_sensor.dht11_pin = CONFIG_DHT11_PIN;
+    
 
     // Read data
     while(1)

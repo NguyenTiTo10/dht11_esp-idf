@@ -4,6 +4,8 @@
 static int drv_dht11_wait_for_pin_state(dht11_t dht11, uint8_t state, int timeout);
 static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us);
 
+static dht11_t dht11_sensor;
+dht11_sensor.dht11_pin = CONFIG_DHT11_PIN;
 
 /**
  * @brief Wait on pin until it reaches the specified state
