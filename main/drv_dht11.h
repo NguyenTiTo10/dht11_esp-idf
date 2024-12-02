@@ -6,6 +6,8 @@
 #include <rom/ets_sys.h>
 #include "esp_log.h"
 
+#include "bsp_timer.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
