@@ -7,4 +7,6 @@
 
 void bsp_timer_ets_delay_us (uint32_t time_us);
 
+int64_t bsp_timer_get_time (void);
+
 #endif

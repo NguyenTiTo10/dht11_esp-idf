@@ -23,7 +23,6 @@ typedef struct
 } dht11_t;
 
 
-void hold_low(dht11_t dht11,int hold_time_us);
 /**
  * @brief The function for reading temperature and humidity values from the dht11
  * @note  This function is blocking, ie: it forces the cpu to busy wait for the duration necessary to finish comms with the sensor.
