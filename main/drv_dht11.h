@@ -5,6 +5,7 @@
 #include <string.h>
 #include <rom/ets_sys.h>
 #include "esp_log.h"
+#include "esp_err.h"
 
 #include "bsp_timer.h"
 #include "bsp_gpio.h"

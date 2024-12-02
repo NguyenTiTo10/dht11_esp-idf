@@ -2,6 +2,8 @@
 
 
 static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout);
+static esp_err_t drv_dht11_init_transmit(dht11_t dht11, int hold_time_us);
+
 
 /**
  * @brief Wait on pin until it reaches the specified state
@@ -33,9 +35,9 @@ static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout)
  * @brief Holds the pin low to the specified duration
  * @param hold_time_us time to hold the pin low for in microseconds
 */
-void hold_low(dht11_t dht11, int hold_time_us)
+static esp_err_t drv_dht11_init_transmit(dht11_t dht11, int hold_time_us)
 {
-    gpio_set_direction(dht11.dht11_pin,GPIO_MODE_OUTPUT);               // Configure GPIO: Output
+    bsp_gpio_set_direction(dht11.dht11_pin,GPIO_MODE_OUTPUT);               // Configure GPIO: Output
     bsp_gpio_write_pin(dht11.dht11_pin,0);                                  // Drives the GPIO pin to a low logic level (0) 
                                                                             // To send a "start signal" to the DHT11 sensor.
     bsp_timer_ets_delay_us(hold_time_us);                                         // Delay "hold_time_us"
@@ -84,7 +86,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
     {
         timeout_counter++;
         gpio_set_direction(dht11->dht11_pin,GPIO_MODE_INPUT);
-        hold_low(*dht11, 18000);                                        // Hold_low 18us, start the signal
+        drv_dht11_init_transmit(*dht11, 18000);                                        // drv_dht11_init_transmit 18us, start the signal
         
                                                                         
                                                                         // If any phase fails, the loop retries after a delay of 20 ms.
