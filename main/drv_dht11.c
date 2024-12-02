@@ -2,7 +2,7 @@
 
 
 static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout);
-static esp_err_t drv_dht11_init_transmit(dht11_t dht11, int hold_time_us);
+static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us);
 
 
 /**
@@ -35,7 +35,7 @@ static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout)
  * @brief Holds the pin low to the specified duration
  * @param hold_time_us time to hold the pin low for in microseconds
 */
-static esp_err_t drv_dht11_init_transmit(dht11_t dht11, int hold_time_us)
+static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us)
 {
     bsp_gpio_set_direction(dht11.dht11_pin,GPIO_MODE_OUTPUT);               // Configure GPIO: Output
     bsp_gpio_write_pin(dht11.dht11_pin,0);                                  // Drives the GPIO pin to a low logic level (0) 
