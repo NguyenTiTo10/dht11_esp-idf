@@ -83,12 +83,12 @@ uint8_t drv_dht11_init(void)
     if (&dht11_sensor == NULL) 
     {
         ESP_LOGE("DHT11:", "Invalid DHT11 pointer");
-        return -1;  // Return error if the pointer is invalid.
+        return 0;  // Return error if the pointer is invalid.
     }
 
     dht11_sensor.dht11_pin = CONFIG_DHT11_PIN;
     
-    return 0;  // Initialization successful
+    return 1;  // Initialization successful
 }
 
 
