@@ -33,7 +33,9 @@ int drv_dht11_set_state_time(dht11_t dht11,int state,int timeout)
 
 
 
-/*
+/**
+ * @brief Holds the pin low to the specified duration
+ * @param hold_time_us time to hold the pin low for in microseconds
     Send a signal from the ESP32 to the DHT11 sensor:
         - By pulling a GPIO pin low (logic level 0) for a specified amount of time.
         - Then returning the pin to high (logic level 1). 
@@ -70,6 +72,7 @@ bool validate_checksum(const uint8_t *data) {
     return (calculated_checksum == data[4]);
 }
 
+
 int dht11_read(dht11_t *dht11,int connection_timeout)
 {
     int waited = 0;                                                     // Tracks the duration for state changes.
@@ -94,7 +97,6 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
         
                                                                         
                                                                         // If any phase fails, the loop retries after a delay of 20 ms.
-
         waited = drv_dht11_set_state_time(*dht11,0,40);                           // Waits for the sensor to pull the line low.                         
 
         if(waited == -1)    
@@ -120,8 +122,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
             ets_delay_us(20000);
             continue;
         } 
-        break;
-        
+        break;     
     }
     
     if(timeout_counter == connection_timeout)                           // Return -1: timeout

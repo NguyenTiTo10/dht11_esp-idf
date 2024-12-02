@@ -22,10 +22,7 @@ typedef struct
     float humidity;
 } dht11_t;
 
-/**
- * @brief Holds the pin low to the specified duration
- * @param hold_time_us time to hold the pin low for in microseconds
-*/
+
 void hold_low(dht11_t dht11,int hold_time_us);
 /**
  * @brief The function for reading temperature and humidity values from the dht11
