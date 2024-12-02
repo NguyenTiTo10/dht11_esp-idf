@@ -92,7 +92,7 @@ uint8_t drv_dht11_init(void)
 }
 
 
-int drv_dht11_start_read(dht11_t *dht11,int connection_timeout)
+int drv_dht11_start_read(void)
 {
     int waited = 0;                                                     // Tracks the duration for state changes.
     int one_duration = 0;                                               // Measure the high pulse durations for decoding bits.

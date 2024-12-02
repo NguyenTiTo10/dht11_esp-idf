@@ -33,7 +33,7 @@ typedef struct
 
 uint8_t  drv_dht11_init (void);
 
-int drv_dht11_start_read(dht11_t *dht11,int connection_timeout);
+int drv_dht11_start_read(void);
 
 float drv_dht11_get_temp(void);
 
