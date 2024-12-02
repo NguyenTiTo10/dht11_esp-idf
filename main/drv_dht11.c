@@ -15,12 +15,12 @@ static dht11_t dht11_sensor;
 */
 static int drv_dht11_wait_for_pin_state(dht11_t dht11, uint8_t state, int timeout)
 {
-    bsp_gpio_set_direction(dht11.dht11_pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
+    bsp_gpio_set_direction(dht11.pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
                                                                         // Let the DHT11 sends data
 
     int wait_time = 0;                                                      // Track elapsed time spent waiting for the pin state
     
-    while(gpio_get_level(dht11.dht11_pin) != state)                    
+    while(gpio_get_level(dht11.pin) != state)                    
     {
         if(wait_time == timeout)                                            // If reached the timeout, return -1.
             return -1;                                  
@@ -39,11 +39,11 @@ static int drv_dht11_wait_for_pin_state(dht11_t dht11, uint8_t state, int timeou
 */
 static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us)
 {
-    bsp_gpio_set_direction(dht11.dht11_pin,GPIO_MODE_OUTPUT);               // Configure GPIO: Output
-    bsp_gpio_write_pin(dht11.dht11_pin,0);                                  // Drives the GPIO pin to a low logic level (0) 
+    bsp_gpio_set_direction(dht11.pin,GPIO_MODE_OUTPUT);               // Configure GPIO: Output
+    bsp_gpio_write_pin(dht11.pin,0);                                  // Drives the GPIO pin to a low logic level (0) 
                                                                             // To send a "start signal" to the DHT11 sensor.
     bsp_timer_ets_delay_us(hold_time_us);                                         // Delay "hold_time_us"
-    bsp_gpio_write_pin(dht11.dht11_pin,1);                                  // Drives the GPIO pin back to a high logic level (1)
+    bsp_gpio_write_pin(dht11.pin,1);                                  // Drives the GPIO pin back to a high logic level (1)
                                                                         // After this step, the DHT11 will begin its response.
 }
 
@@ -86,7 +86,7 @@ uint8_t drv_dht11_init(void)
         return 0;  // Return error if the pointer is invalid.
     }
 
-    dht11_sensor.dht11_pin = CONFIG_DHT11_PIN;
+    dht11_sensor.pin = CONFIG_DHT11_PIN;
     
     return 1;  // Initialization successful
 }
@@ -108,10 +108,10 @@ int drv_dht11_start_read(void)
         0x00
     };
 
-    while(timeout_counter < connection_timeout)                         
+    while(timeout_counter < CONFIG_CONNECTION_TIMEOUT)                         
     {
         timeout_counter++;
-        gpio_set_direction(dht11->dht11_pin,GPIO_MODE_INPUT);
+        bsp_gpio_set_direction(dht11_sensor.pin,GPIO_MODE_INPUT);
         drv_dht11_init_transmit(*dht11, 18000);                                        // drv_dht11_init_transmit 18us, start the signal
         
                                                                         

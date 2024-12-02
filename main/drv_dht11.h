@@ -15,18 +15,18 @@
 
 /**
  * Structure containing readings and info about the dht11
- * @var dht11_pin the pin associated with the dht11
+ * @var pin the pin associated with the dht11
  * @var temperature last temperature reading
  * @var humidity last humidity reading 
 */
 
 
-#define CONFIG_DHT11_PIN GPIO_NUM_4
-#define CONFIG_CONNECTION_TIMEOUT 5
+#define     CONFIG_DHT11_PIN            GPIO_NUM_4
+#define     CONFIG_CONNECTION_TIMEOUT   5
 
 typedef struct
 {
-    int dht11_pin;
+    int     pin;
     float temperature;
     float humidity;
 } dht11_t;
