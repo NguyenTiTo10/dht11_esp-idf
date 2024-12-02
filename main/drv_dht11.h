@@ -26,7 +26,9 @@ typedef struct
     float humidity;
 } dht11_t;
 
-
-
 int drv_dht11_start_read(dht11_t *dht11,int connection_timeout);
+
+float drv_dht11_get_temp(void);
+
+float drv_dht11_get_humid(void);
 #endif
