@@ -173,3 +173,13 @@ int drv_dht11_start_read(void)
     dht11_sensor.temperature = recieved_data[2] + recieved_data[3] /10.0 ;            // Tương tự với nhiệt độ
     return 0;                                                                   
 }
+
+float drv_dht11_get_temp(void)
+{
+    float ret_temp;
+    ret_temp = dht11_sensor.temperature;
+
+    return ret_temp;
+}
+
+// float drv_dht11_get_humid(void);
