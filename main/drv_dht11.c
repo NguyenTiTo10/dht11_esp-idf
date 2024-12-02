@@ -3,11 +3,9 @@
 
 static int drv_dht11_wait_for_pin_state(dht11_t dht11, uint8_t state, int timeout);
 static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us);
+static bool drv_dht11_checksum_valid(const uint8_t *data);
 
 static dht11_t dht11_sensor;
-
-
-dht11_sensor.dht11_pin = CONFIG_DHT11_PIN;
 
 /**
  * @brief Wait on pin until it reaches the specified state
@@ -49,6 +47,8 @@ static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us)
                                                                         // After this step, the DHT11 will begin its response.
 }
 
+
+
 /**
  * @brief Validate the checksum of the received DHT11 data.
  * 
@@ -60,7 +60,8 @@ static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us)
  *             data[4] = Checksum
  * @return true if checksum is valid, false otherwise.
  */
-bool drv_dht11_checksum_valid(const uint8_t *data) {
+static bool drv_dht11_checksum_valid(const uint8_t *data) 
+{
     if (data == NULL) {
         return false; // Handle null pointer
     }
@@ -69,13 +70,15 @@ bool drv_dht11_checksum_valid(const uint8_t *data) {
     return (calculated_checksum == data[4]);
 }
 
+
+
 /**
  * @brief Initializes the DHT11 sensor.
  *        This function sets the GPIO pin direction and sends the initial signal to the DHT11.
  * @param dht11 Pointer to the DHT11 instance (contains the GPIO pin info).
  * @return Returns 0 if successful, -1 if initialization failed.
  */
-int drv_dht11_init(dht11_t *dht11)
+int drv_dht11_init()
 {
     if (dht11 == NULL) 
     {
