@@ -78,25 +78,15 @@ static bool drv_dht11_checksum_valid(const uint8_t *data)
  * @param dht11 Pointer to the DHT11 instance (contains the GPIO pin info).
  * @return Returns 0 if successful, -1 if initialization failed.
  */
-int drv_dht11_init()
+uint8_t drv_dht11_init(void)
 {
-    if (dht11 == NULL) 
+    if (&dht11_sensor == NULL) 
     {
         ESP_LOGE("DHT11:", "Invalid DHT11 pointer");
         return -1;  // Return error if the pointer is invalid.
     }
 
-    // Set the GPIO direction to OUTPUT to initiate communication.
-    bsp_gpio_set_direction(dht11->dht11_pin, GPIO_MODE_OUTPUT);
-    
-    // Send the initial "start signal" to the DHT11 sensor.
-    drv_dht11_init_transmit(*dht11, 18000);  // 18ms low signal, as per DHT11 specification
-    
-    // Give the DHT11 sensor some time to initialize and get ready for data transmission.
-    bsp_timer_ets_delay_us(20000);  // 20ms delay after the start signal.
-
-    // Optionally, we can add further checks here to verify if the DHT11 sensor is responding.
-    // For example, we could use drv_dht11_check_state_time to check if the sensor pulls the line low.
+    dht11_sensor.dht11_pin = CONFIG_DHT11_PIN;
     
     return 0;  // Initialization successful
 }
