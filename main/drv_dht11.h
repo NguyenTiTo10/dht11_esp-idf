@@ -22,9 +22,8 @@
 
 
 #define     CONFIG_DHT11_PIN            GPIO_NUM_4
-#define     CONFIG_CONNECTION_TIMEOUT   5
-
 #define     TIME_LOW_INIT_SIGNAL        18000
+#define     CONNECTION_TIMEOUT          5
 
 typedef struct
 {

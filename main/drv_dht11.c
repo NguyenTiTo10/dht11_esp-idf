@@ -108,7 +108,7 @@ int drv_dht11_start_read(void)
         0x00
     };
 
-    while(timeout_counter < CONFIG_CONNECTION_TIMEOUT)                         
+    while(timeout_counter < CONNECTION_TIMEOUT)                         
     {
         timeout_counter++;
         bsp_gpio_set_direction(dht11_sensor.pin,GPIO_MODE_INPUT);
@@ -144,7 +144,7 @@ int drv_dht11_start_read(void)
         break;     
     }
     
-    if(timeout_counter == connection_timeout)                           // Return -1: timeout
+    if(timeout_counter == CONNECTION_TIMEOUT)                           // Return -1: timeout
         return -1;
 
     for(int i = 0; i < 5; i++)
