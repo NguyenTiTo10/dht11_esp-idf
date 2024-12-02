@@ -1,9 +1,9 @@
 #include "drv_dht11.h"
 
 
-static int drv_dht11_wait_for_pin_state(dht11_t dht11, uint8_t state, int timeout);
-static void drv_dht11_init_transmit(void);
-static bool drv_dht11_checksum_valid(const uint8_t *data);
+static int drv_dht11_wait_for_pin_state (uint8_t state, int timeout);
+static void drv_dht11_init_transmit     (void);
+static bool drv_dht11_checksum_valid    (const uint8_t *data);
 
 static dht11_t dht11_sensor;
 
@@ -13,14 +13,14 @@ static dht11_t dht11_sensor;
  * @param state state to wait for
  * @param timeout if counter reaches timeout the function returns -1
 */
-static int drv_dht11_wait_for_pin_state(dht11_t dht11, uint8_t state, int timeout)
+static int drv_dht11_wait_for_pin_state (uint8_t state, int timeout)
 {
-    bsp_gpio_set_direction(dht11.pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
+    bsp_gpio_set_direction(dht11_sensor.pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
                                                                         // Let the DHT11 sends data
 
     int wait_time = 0;                                                      // Track elapsed time spent waiting for the pin state
     
-    while(gpio_get_level(dht11.pin) != state)                    
+    while(gpio_get_level(dht11_sensor.pin) != state)                    
     {
         if(wait_time == timeout)                                            // If reached the timeout, return -1.
             return -1;                                  
@@ -112,11 +112,11 @@ int drv_dht11_start_read(void)
     {
         timeout_counter++;
         bsp_gpio_set_direction(dht11_sensor.pin,GPIO_MODE_INPUT);
-        drv_dht11_init_transmit(dht11, 18000);                                        // drv_dht11_init_transmit 18us, start the signal
+        drv_dht11_init_transmit();                                        // drv_dht11_init_transmit 18us, start the signal
         
                                                                         
                                                                         // If any phase fails, the loop retries after a delay of 20 ms.
-        waited = drv_dht11_wait_for_pin_state(*dht11,0,40);                           // Waits for the sensor to pull the line low.                         
+        waited = drv_dht11_wait_for_pin_state(dht11_sensor,0,40);                           // Waits for the sensor to pull the line low.                         
 
         if(waited == -1)    
         {
