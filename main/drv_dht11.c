@@ -13,22 +13,22 @@
     By measuring how long it takes for the pin to reach a state, 
     This function enables the driver to decode the transmitted bits.
 */
-int drv_dht11_check_state_time(dht11_t dht11,int state,int timeout)
+int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout)
 {
-    gpio_set_direction(dht11.dht11_pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
+    bsp_gpio_set_direction(dht11.dht11_pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
                                                                         // Let the DHT11 sends data
 
-    int count = 0;                                                      // Track elapsed time spent waiting for the pin state
+    int time_wait = 0;                                                      // Track elapsed time spent waiting for the pin state
     
     while(gpio_get_level(dht11.dht11_pin) != state)                    
     {
-        if(count == timeout)                                            // If reached the timeout, return -1.
+        if(time_wait == timeout)                                            // If reached the timeout, return -1.
             return -1;                                  
-        count += 2;
+        time_wait += 2;
         ets_delay_us(2);                                                // A short delay of 2 microseconds
     }
 
-    return  count;                                                      // Return the Elapsed Time
+    return  time_wait;                                                      // Return the Elapsed Time
 }
 
 
