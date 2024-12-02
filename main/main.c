@@ -1,7 +1,5 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
 #include "drv_dht11.h"
+#include "bsp_timer.h"
 
 
 void app_main() 
@@ -29,6 +27,6 @@ void app_main()
       printf("[Temperature]> %.2f  \n",temp);
       printf("[Humidity]> %.2f \n \n",humid);
 
-      vTaskDelay(2000/portTICK_PERIOD_MS);
+      bsp_delay(2000);
     } 
 }

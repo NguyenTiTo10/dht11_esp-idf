@@ -25,6 +25,7 @@
     "bitset": "c",
     "algorithm": "c",
     "format": "c",
-    "drv_dht11.h": "c"
+    "drv_dht11.h": "c",
+    "string.h": "c"
   }
 }
