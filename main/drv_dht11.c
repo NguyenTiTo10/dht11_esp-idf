@@ -174,6 +174,8 @@ int drv_dht11_start_read(void)
     return 0;                                                                   
 }
 
+
+
 float drv_dht11_get_temp(void)
 {
     float ret_temp;
@@ -182,4 +184,11 @@ float drv_dht11_get_temp(void)
     return ret_temp;
 }
 
-// float drv_dht11_get_humid(void);
+
+float drv_dht11_get_humid(void)
+{
+    float ret_humid;
+    ret_humid = dht11_sensor.humidity;
+
+    return ret_humid;
+}
