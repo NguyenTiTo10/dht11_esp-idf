@@ -33,5 +33,5 @@ typedef struct
  * @note  Wait for atleast 2 seconds between reads 
  * @param connection_timeout the number of connection attempts before declaring a timeout
 */
-int dht11_read(dht11_t *dht11,int connection_timeout);
+int drv_dht11_start_read(dht11_t *dht11,int connection_timeout);
 #endif

@@ -12,7 +12,7 @@ void app_main() {
     // Read data
     while(1)
     {
-      if(!dht11_read(&dht11_sensor, CONFIG_CONNECTION_TIMEOUT))
+      if(!drv_dht11_start_read(&dht11_sensor, CONFIG_CONNECTION_TIMEOUT))
       {  
         printf("[Temperature]> %.2f \n",dht11_sensor.temperature);
         printf("[Humidity]> %.2f \n",dht11_sensor.humidity);
