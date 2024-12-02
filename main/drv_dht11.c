@@ -80,11 +80,11 @@ static bool drv_dht11_checksum_valid(const uint8_t *data)
  */
 uint8_t drv_dht11_init(void)
 {
-    if (&dht11_sensor == NULL) 
-    {
-        ESP_LOGE("DHT11:", "Invalid DHT11 pointer");
-        return 0;  // Return error if the pointer is invalid.
-    }
+    // if (&dht11_sensor == NULL) 
+    // {
+    //     ESP_LOGE("DHT11:", "Invalid DHT11 pointer");
+    //     return 0;  // Return error if the pointer is invalid.
+    // }
 
     dht11_sensor.pin = CONFIG_DHT11_PIN;
     
@@ -116,7 +116,7 @@ int drv_dht11_start_read(void)
         
                                                                         
                                                                         // If any phase fails, the loop retries after a delay of 20 ms.
-        waited = drv_dht11_wait_for_pin_state(dht11_sensor,0,40);                           // Waits for the sensor to pull the line low.                         
+        waited = drv_dht11_wait_for_pin_state   (0,40);                           // Waits for the sensor to pull the line low.                         
 
         if(waited == -1)    
         {
@@ -126,7 +126,7 @@ int drv_dht11_start_read(void)
         } 
 
 
-        waited = drv_dht11_wait_for_pin_state(*dht11,1,80);                           // Waits for the sensor to pull the line high.
+        waited = drv_dht11_wait_for_pin_state   (1,80);                           // Waits for the sensor to pull the line high.
         if(waited == -1) 
         {
             ESP_LOGE("DHT11:","Failed at phase 2");
@@ -134,7 +134,7 @@ int drv_dht11_start_read(void)
             continue;
         } 
         
-        waited = drv_dht11_wait_for_pin_state(*dht11,0,80);                           // Waits for the sensor to pull the line low again.
+        waited = drv_dht11_wait_for_pin_state   (0,80);                           // Waits for the sensor to pull the line low again.
         if(waited == -1) 
         {
             ESP_LOGE("DHT11:","Failed at phase 3");
@@ -151,23 +151,25 @@ int drv_dht11_start_read(void)
     {
         for(int j = 0; j < 8; j++)
         {
-            zero_duration = drv_dht11_wait_for_pin_state(*dht11,1,60);                        // Time spent at logic level 1
-            one_duration = drv_dht11_wait_for_pin_state(*dht11,0,80);                         // Time spent at logic level 0
+            zero_duration   =   drv_dht11_wait_for_pin_state (1,60);                        // Time spent at logic level 1
+            one_duration    =   drv_dht11_wait_for_pin_state (0,80);                         // Time spent at logic level 0
+
             recieved_data[i] |= (one_duration > zero_duration) << (7 - j);      // If one_duration > zero_duration, 
                                                                                     // the bit is 1; 
                                                                                     // otherwise, it’s 0
         }
     }
 
-    // // Validate checksum
-    // if (!drv_dht11_checksum_valid(recieved_data)) {
-    //     ESP_LOGE("DHT11:", "Checksum validation failed");
-    //     return -2;
-    // }
+    // Validate checksum
+    if (!drv_dht11_checksum_valid(recieved_data)) 
+    {
+        ESP_LOGE("DHT11:", "Checksum validation failed");
+        // return -2;
+    }
 
-    dht11->humidity = recieved_data[0] + recieved_data[1] /10.0 ;               // recieved_data[0]: Phần đơn vị
+    dht11_sensor.humidity = recieved_data[0] + recieved_data[1] /10.0 ;               // recieved_data[0]: Phần đơn vị
                                                                                 // recieved_data[1] /10.0: Phần hàng chục
 
-    dht11->temperature = recieved_data[2] + recieved_data[3] /10.0 ;            // Tương tự với nhiệt độ
+    dht11_sensor.temperature = recieved_data[2] + recieved_data[3] /10.0 ;            // Tương tự với nhiệt độ
     return 0;                                                                   
 }
