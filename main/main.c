@@ -6,10 +6,14 @@
 
 void app_main() 
 {
-    drv_dht11_init();
+    if (!drv_dht11_init())
+    {
+      ESP_LOGE("DHT11", "DHT11 Initialization failed!");
+    }
 
     uint32_t count = 0;
-    float temp, humid;
+    float temp = 0.0f, humid = 0.0f;  // Initialize variables to default values
+
 
     while(1)
     {
@@ -21,10 +25,10 @@ void app_main()
         count += 1;
       }
 
-      printf("Count: %d", count);
-      printf("[Temperature]> %.2f \n",temp);
-      printf("[Humidity]> %.2f \n",humid);
-      
+      printf("Count: %lu\n", count);
+      printf("[Temperature]> %.2f  \n",temp);
+      printf("[Humidity]> %.2f \n \n",humid);
+
       vTaskDelay(2000/portTICK_PERIOD_MS);
     } 
 }
