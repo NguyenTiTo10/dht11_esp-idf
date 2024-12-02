@@ -1,7 +1,6 @@
 #include "drv_dht11.h"
 
 
-
 /**
  * @brief Wait on pin until it reaches the specified state
  * @return returns either the time waited or -1 in the case of a timeout
@@ -14,7 +13,7 @@
     By measuring how long it takes for the pin to reach a state, 
     This function enables the driver to decode the transmitted bits.
 */
-int drv_dht11_time_wait_state(dht11_t dht11,int state,int timeout)
+int drv_dht11_set_state_time(dht11_t dht11,int state,int timeout)
 {
     gpio_set_direction(dht11.dht11_pin, GPIO_MODE_INPUT);               // Set the GPIO mode: Input 
                                                                         // Let the DHT11 sends data
@@ -96,7 +95,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
                                                                         
                                                                         // If any phase fails, the loop retries after a delay of 20 ms.
 
-        waited = drv_dht11_time_wait_state(*dht11,0,40);                           // Waits for the sensor to pull the line low.                         
+        waited = drv_dht11_set_state_time(*dht11,0,40);                           // Waits for the sensor to pull the line low.                         
 
         if(waited == -1)    
         {
@@ -106,7 +105,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
         } 
 
 
-        waited = drv_dht11_time_wait_state(*dht11,1,80);                           // Waits for the sensor to pull the line high.
+        waited = drv_dht11_set_state_time(*dht11,1,80);                           // Waits for the sensor to pull the line high.
         if(waited == -1) 
         {
             ESP_LOGE("DHT11:","Failed at phase 2");
@@ -114,7 +113,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
             continue;
         } 
         
-        waited = drv_dht11_time_wait_state(*dht11,0,80);                           // Waits for the sensor to pull the line low again.
+        waited = drv_dht11_set_state_time(*dht11,0,80);                           // Waits for the sensor to pull the line low again.
         if(waited == -1) 
         {
             ESP_LOGE("DHT11:","Failed at phase 3");
@@ -132,8 +131,8 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
     {
         for(int j = 0; j < 8; j++)
         {
-            zero_duration = drv_dht11_time_wait_state(*dht11,1,60);                        // Time spent at logic level 1
-            one_duration = drv_dht11_time_wait_state(*dht11,0,80);                         // Time spent at logic level 0
+            zero_duration = drv_dht11_set_state_time(*dht11,1,60);                        // Time spent at logic level 1
+            one_duration = drv_dht11_set_state_time(*dht11,0,80);                         // Time spent at logic level 0
             recieved_data[i] |= (one_duration > zero_duration) << (7 - j);      // If one_duration > zero_duration, 
                                                                                     // the bit is 1; 
                                                                                     // otherwise, it’s 0
