@@ -3,6 +3,8 @@
 
 static int drv_dht11_check_state_time(dht11_t dht11, uint8_t state, int timeout);
 static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us);
+static  drv_dht11_checksum_valid(const uint8_t *data);
+
 
 
 /**
@@ -56,8 +58,10 @@ static void drv_dht11_init_transmit(dht11_t dht11, int hold_time_us)
  *             data[4] = Checksum
  * @return true if checksum is valid, false otherwise.
  */
-bool validate_checksum(const uint8_t *data) {
-    if (data == NULL) {
+static  drv_dht11_checksum_valid(const uint8_t *data) 
+{
+    if (data == NULL) 
+    {
         return false; // Handle null pointer
     }
 
@@ -134,7 +138,7 @@ int dht11_read(dht11_t *dht11,int connection_timeout)
     }
 
     // Validate checksum
-    if (!validate_checksum(recieved_data)) {
+    if (!drv_dht11_checksum_valid(recieved_data)) {
         ESP_LOGE("DHT11:", "Checksum validation failed");
         return -2;
     }
