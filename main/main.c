@@ -1,12 +1,14 @@
 #include "drv_dht11.h"
 #include "bsp_timer.h"
 
+#define DHT11_INTERVAL_US 2000000  // 2 seconds interval in microseconds
 
 void app_main() 
 {
     if (!drv_dht11_init())
     {
       ESP_LOGE("DHT11", "DHT11 Initialization failed!");
+      return;
     }
 
     uint32_t count = 0;
