@@ -42,6 +42,8 @@ void app_main()
           }
       }
 
+      bsp_delay(10);
+
         // Perform other tasks here
         // Example: Handle communication, control other peripherals, etc.
     } 
